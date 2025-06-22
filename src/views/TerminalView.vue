@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed, onUnmounted } from 'vue'
 import { projectList, socialLinks, techStack } from '@/defs'
+import rickrollFrames from '@/data/gifs/rickroll.json'
 // Note: SVG content extracted from Vue icon components for terminal use
 
 // Terminal themes
@@ -295,6 +296,8 @@ const theme = computed(() => themes[currentTheme.value])
 // Mobile detection
 const isMobile = ref(false)
 
+// Rickroll easter egg (no state needed for simple implementation)
+
 const detectMobile = () => {
     const userAgent = navigator.userAgent.toLowerCase()
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
@@ -306,6 +309,331 @@ const detectMobile = () => {
     return isTouchDevice && (isSmallScreen || isMobileUserAgent)
 }
 
+// Function to downscale ASCII art by taking every nth character and line
+const downscaleAscii = (frame: string[], scale: number = 2): string[] => {
+    const scaledFrame: string[] = []
+
+    // Take every nth line
+    for (let i = 0; i < frame.length; i += scale) {
+        let scaledLine = ''
+        // Take every nth character from the line
+        for (let j = 0; j < frame[i].length; j += scale) {
+            scaledLine += frame[i][j]
+        }
+        scaledFrame.push(scaledLine)
+    }
+
+    return scaledFrame
+}
+
+// Function to execute the rickroll easter egg
+const executeRickroll = () => {
+    if (isMobile.value) {
+        // Mobile: Just show "Rickrolled" and open the link
+        terminalHistory.value.push({
+            content: 'Rickrolled, try to open from desktop',
+            isHtml: false,
+            isCommand: false
+        })
+
+        // Open the rickroll video immediately on mobile
+        window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank', 'noopener,noreferrer')
+    } else {
+        // Desktop: Show ASCII art then open the link
+        // Get a random frame from the rickroll frames
+        const randomFrameIndex = Math.floor(Math.random() * rickrollFrames.length)
+        const randomFrame = rickrollFrames[randomFrameIndex]
+
+        // Downscale the ASCII art for better terminal display
+        const scaledFrame = downscaleAscii(randomFrame, 2)
+        const frameContent = scaledFrame.join('\n')
+
+        // Display the ASCII art with a rickroll message
+        terminalHistory.value.push({
+            content: `🎵 Never gonna give you up! 🎵\n\n${frameContent}`,
+            isHtml: false,
+            isCommand: false
+        })
+
+        // Open the rickroll video in a new tab after a short delay
+        setTimeout(() => {
+            window.open(
+                'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+                '_blank',
+                'noopener,noreferrer'
+            )
+
+            // Add a follow-up message
+            terminalHistory.value.push({
+                content: '🎵 Never gonna let you down! 🎵',
+                isHtml: false,
+                isCommand: false
+            })
+
+            // Auto-scroll to bottom
+            nextTick(() => {
+                if (terminalRef.value) {
+                    terminalRef.value.scrollTop = terminalRef.value.scrollHeight
+                }
+            })
+        }, 1000) // 1 second delay before opening the link
+    }
+}
+
+// File system structure
+interface FileSystemNode {
+    type: 'file' | 'directory'
+    name: string
+    content?: string
+    children?: Record<string, FileSystemNode>
+    size: number
+    permissions: string
+    owner: string
+    group: string
+    modified: string
+}
+
+// Helper function to get current date in ls format
+const getCurrentDateString = (): string => {
+    const now = new Date()
+    const months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+    ]
+    return `${months[now.getMonth()]} ${now.getFullYear()}`
+}
+
+const fileSystem: Record<string, FileSystemNode> = {
+    about: {
+        type: 'directory',
+        name: 'about',
+        size: 64,
+        permissions: 'drwxr-xr-x',
+        owner: 'imggion',
+        group: 'staff',
+        modified: getCurrentDateString(),
+        children: {
+            'bio.txt': {
+                type: 'file',
+                name: 'bio.txt',
+                size: 2048,
+                permissions: '-rw-r--r--',
+                owner: 'imggion',
+                group: 'staff',
+                modified: getCurrentDateString(),
+                content: `Giovanni D'Andrea - Software Developer
+
+Hi, I'm a software developer with a solid background in systems administration.
+
+I blend disciplined engineering with a relaxed attitude that keeps collaboration 
+smooth and enjoyable. I enjoy turning complex ideas into clean, dependable code 
+and stay curious about new tools and practices that raise the bar.
+
+When I'm not refining product backlogs or automating workflows, you'll likely 
+find me exploring a new city, dialing in the perfect espresso shot, or planning 
+my next hike.
+
+I'm ambitious, my goal is to change the world through simplicity.. and that's 
+why we made (me and my team) Exastudio.
+
+Simplicity reigns in my approach to development.`
+            },
+            'philosophy.txt': {
+                type: 'file',
+                name: 'philosophy.txt',
+                size: 1024,
+                permissions: '-rw-r--r--',
+                owner: 'imggion',
+                group: 'staff',
+                modified: getCurrentDateString(),
+                content: `Development Philosophy
+
+• Simplicity over complexity
+• Clean, readable code
+• Automated workflows
+• Continuous learning
+• Collaborative problem-solving
+• User-centered design thinking
+
+"The best code is the code that doesn't need to be written."
+"Simplicity is the ultimate sophistication."`
+            }
+        }
+    },
+    projects: {
+        type: 'directory',
+        name: 'projects',
+        size: 96,
+        permissions: 'drwxr-xr-x',
+        owner: 'imggion',
+        group: 'staff',
+        modified: getCurrentDateString(),
+        children: {
+            'current.txt': {
+                type: 'file',
+                name: 'current.txt',
+                size: 1536,
+                permissions: '-rw-r--r--',
+                owner: 'imggion',
+                group: 'staff',
+                modified: getCurrentDateString(),
+                content: `Current Projects
+
+${projectList
+    .map(
+        (project, index) => `[${index + 1}] ${project.name}
+Description: ${project.description}
+Status: Active
+Repository: ${project.linkTo}`
+    )
+    .join('\n\n')}`
+            },
+            'archived.txt': {
+                type: 'file',
+                name: 'archived.txt',
+                size: 512,
+                permissions: '-rw-r--r--',
+                owner: 'imggion',
+                group: 'staff',
+                modified: getCurrentDateString(),
+                content: `Archived Projects
+
+• Legacy Portfolio (v1.0) - React-based portfolio
+• CLI Tools Collection - Various bash utilities
+• Learning Projects - Educational experiments
+• Prototype Applications - Proof of concepts
+
+Note: Some projects have been refactored into current work.`
+            }
+        }
+    },
+    social: {
+        type: 'directory',
+        name: 'social',
+        size: 48,
+        permissions: 'drwxr-xr-x',
+        owner: 'imggion',
+        group: 'staff',
+        modified: getCurrentDateString(),
+        children: {
+            'links.txt': {
+                type: 'file',
+                name: 'links.txt',
+                size: 384,
+                permissions: '-rw-r--r--',
+                owner: 'imggion',
+                group: 'staff',
+                modified: getCurrentDateString(),
+                content: `Social Media Links
+
+GitHub: https://github.com/imggion
+LinkedIn: https://www.linkedin.com/in/giovanni-d-andrea-b3b456111/
+X (Twitter): https://x.com/imggion
+
+Professional Email: giovanni@exastudio.io
+
+Feel free to connect and follow my work!`
+            }
+        }
+    },
+    'contact.txt': {
+        type: 'file',
+        name: 'contact.txt',
+        size: 512,
+        permissions: '-rw-r--r--',
+        owner: 'imggion',
+        group: 'staff',
+        modified: getCurrentDateString(),
+        content: `Contact Information
+
+Name: Giovanni D'Andrea
+Email: giovanni@exastudio.io
+Location: Italy (Remote Available)
+
+Professional Profiles:
+• GitHub: github.com/imggion
+• LinkedIn: linkedin.com/in/giovanni-d-andrea-b3b456111/
+• X: x.com/imggion
+
+Company: Exastudio
+Website: exastudio.io
+
+Available for:
+• Full-time opportunities
+• Consulting projects
+• Technical collaborations
+• Open source contributions`
+    },
+    'skills.txt': {
+        type: 'file',
+        name: 'skills.txt',
+        size: 256,
+        permissions: '-rw-r--r--',
+        owner: 'imggion',
+        group: 'staff',
+        modified: getCurrentDateString(),
+        content: `Technical Skills
+
+Programming Languages:
+${techStack
+    .filter((tech) =>
+        ['Python', 'JavaScript', 'TypeScript', 'Rust', 'C', 'Bash'].includes(tech.name)
+    )
+    .map((tech) => `• ${tech.name}`)
+    .join('\n')}
+
+Frameworks & Tools:
+${techStack
+    .filter((tech) => ['Vue', 'Django', 'Docker', 'Nuxt.js'].includes(tech.name))
+    .map((tech) => `• ${tech.name}`)
+    .join('\n')}
+
+Databases:
+${techStack
+    .filter((tech) => ['PostgreSQL'].includes(tech.name))
+    .map((tech) => `• ${tech.name}`)
+    .join('\n')}
+
+Other:
+• Systems Administration
+• DevOps & Automation
+• Git & Version Control
+• Linux/Unix Systems`
+    }
+}
+
+// Current directory tracking
+const currentPath = ref<string[]>([])
+const getCurrentDirectory = (): Record<string, FileSystemNode> => {
+    let current: Record<string, FileSystemNode> = fileSystem
+    for (const segment of currentPath.value) {
+        const node = current[segment]
+        if (node?.type === 'directory' && node.children) {
+            current = node.children
+        } else {
+            return {}
+        }
+    }
+    return current
+}
+
+const getCurrentPathString = (): string => {
+    return (
+        '/home/imggion/portfolio' +
+        (currentPath.value.length > 0 ? '/' + currentPath.value.join('/') : '')
+    )
+}
+
 const commands: Record<string, (args?: string) => string | { content: string; isHtml: boolean }> = {
     help: () => `Available commands:
   about         - Learn about Giovanni
@@ -314,8 +642,10 @@ const commands: Record<string, (args?: string) => string | { content: string; is
   contact       - Contact information
   clear         - Clear terminal
   whoami        - Display current user
-  ls            - List portfolio contents
+  ls            - List directory contents
   pwd           - Show current directory
+  cd            - Change directory
+  cat           - Display file contents
   date          - Show current date and time
   font          - Show current font information
   theme         - Change terminal theme
@@ -398,14 +728,101 @@ Simplicity reigns in my approach to development.`,
 
     whoami: () => 'imggion',
 
-    ls: () => `total 4
-drwxr-xr-x  2 imggion  staff   64 Dec  2024 about/
-drwxr-xr-x  2 imggion  staff   96 Dec  2024 projects/
-drwxr-xr-x  2 imggion  staff   48 Dec  2024 social/
--rw-r--r--  1 imggion  staff  512 Dec  2024 contact.txt
--rw-r--r--  1 imggion  staff  256 Dec  2024 skills.txt`,
+    ls: (args: string = '') => {
+        const currentDir = getCurrentDirectory()
+        const entries = Object.values(currentDir)
 
-    pwd: () => '/home/imggion/portfolio',
+        if (entries.length === 0) {
+            return 'ls: cannot access directory: No such file or directory'
+        }
+
+        const dirs = entries
+            .filter((entry) => entry.type === 'directory')
+            .sort((a, b) => a.name.localeCompare(b.name))
+        const files = entries
+            .filter((entry) => entry.type === 'file')
+            .sort((a, b) => a.name.localeCompare(b.name))
+
+        let output = `total ${entries.length}\n`
+
+        // Display directories first
+        dirs.forEach((entry) => {
+            output += `${entry.permissions}  2 ${entry.owner}  ${entry.group}   ${entry.size.toString().padStart(3)} ${entry.modified} ${entry.name}/\n`
+        })
+
+        // Then display files
+        files.forEach((entry) => {
+            output += `${entry.permissions}  1 ${entry.owner}  ${entry.group}  ${entry.size.toString().padStart(4)} ${entry.modified} ${entry.name}\n`
+        })
+
+        return output.trim()
+    },
+
+    pwd: () => getCurrentPathString(),
+
+    cd: (args: string = '') => {
+        const target = args.trim()
+
+        if (!target) {
+            // cd with no arguments goes to home
+            currentPath.value = []
+            return ''
+        }
+
+        if (target === '..') {
+            // Go up one directory
+            if (currentPath.value.length > 0) {
+                currentPath.value.pop()
+            }
+            return ''
+        }
+
+        if (target === '/') {
+            // Go to root
+            currentPath.value = []
+            return ''
+        }
+
+        if (target.startsWith('/')) {
+            return 'cd: absolute paths not supported in this demo'
+        }
+
+        // Handle relative path
+        const currentDir = getCurrentDirectory()
+        const targetNode = currentDir[target]
+
+        if (!targetNode) {
+            return `cd: ${target}: No such file or directory`
+        }
+
+        if (targetNode.type !== 'directory') {
+            return `cd: ${target}: Not a directory`
+        }
+
+        currentPath.value.push(target)
+        return ''
+    },
+
+    cat: (args: string = '') => {
+        const filename = args.trim()
+
+        if (!filename) {
+            return 'cat: missing file operand'
+        }
+
+        const currentDir = getCurrentDirectory()
+        const targetNode = currentDir[filename]
+
+        if (!targetNode) {
+            return `cat: ${filename}: No such file or directory`
+        }
+
+        if (targetNode.type !== 'file') {
+            return `cat: ${filename}: Is a directory`
+        }
+
+        return targetNode.content || ''
+    },
 
     date: () => new Date().toString(),
 
@@ -430,7 +847,6 @@ drwxr-xr-x  2 imggion  staff   48 Dec  2024 social/
         Object.entries(customSvgIcons).forEach(([key, config]) => {
             output += `${config.svg}<span style="color: ${config.color}; font-weight: 500;">${config.name}</span> - "${key}"\n`
         })
-        output += '\nThese icons use SVG content from Vue icon components!'
         return { content: output, isHtml: true }
     },
 
@@ -445,6 +861,11 @@ drwxr-xr-x  2 imggion  staff   48 Dec  2024 social/
             return `Theme changed to: ${themes[themeName].name}`
         }
         return `Theme "${themeName}" not found. Use "themes" to see available themes`
+    },
+
+    '42': () => {
+        executeRickroll()
+        return '' // Return empty string since rickroll handles display
     }
 }
 
@@ -468,6 +889,13 @@ const executeCommand = (cmd: string) => {
     if (cmd.trim() !== '') {
         commandHistory.value.push(cmd.trim())
         historyIndex.value = -1
+    }
+
+    // Check if command contains '42' (rickroll easter egg)
+    if (cmd.includes('42')) {
+        executeRickroll()
+        // Don't execute the normal command flow
+        return
     }
 
     if (command in commands) {
@@ -497,10 +925,131 @@ const executeCommand = (cmd: string) => {
     })
 }
 
+// Autocompletion logic
+const getCompletions = (input: string): string[] => {
+    const parts = input.trim().split(' ')
+
+    if (parts.length === 1) {
+        // Complete command names
+        const commandNames = Object.keys(commands)
+        const partial = parts[0].toLowerCase()
+        return commandNames.filter((cmd) => cmd.startsWith(partial))
+    } else if (parts.length === 2 && ['cd', 'cat', 'ls'].includes(parts[0])) {
+        // Complete file/directory names for file-related commands
+        const currentDir = getCurrentDirectory()
+        const partial = parts[1].toLowerCase()
+        const entries = Object.keys(currentDir)
+
+        // For cd, only show directories
+        if (parts[0] === 'cd') {
+            return entries.filter(
+                (name) =>
+                    currentDir[name].type === 'directory' && name.toLowerCase().startsWith(partial)
+            )
+        }
+
+        // For cat, only show files
+        if (parts[0] === 'cat') {
+            return entries.filter(
+                (name) => currentDir[name].type === 'file' && name.toLowerCase().startsWith(partial)
+            )
+        }
+
+        // For ls, show all entries
+        return entries.filter((name) => name.toLowerCase().startsWith(partial))
+    }
+
+    return []
+}
+
+const handleTabCompletion = () => {
+    const completions = getCompletions(currentInput.value)
+
+    if (completions.length === 0) {
+        return // No completions found
+    }
+
+    if (completions.length === 1) {
+        // Single completion - complete it
+        const parts = currentInput.value.trim().split(' ')
+        if (parts.length === 1) {
+            currentInput.value = completions[0] + ' '
+        } else {
+            parts[parts.length - 1] = completions[0]
+            currentInput.value = parts.join(' ')
+            // Add space if it's a command that expects arguments
+            if (parts.length === 2 && ['cd', 'cat', 'ls', 'theme'].includes(parts[0])) {
+                currentInput.value += ' '
+            }
+        }
+    } else {
+        // Multiple completions - show them and complete common prefix
+        const parts = currentInput.value.trim().split(' ')
+        const partial = parts.length > 1 ? parts[parts.length - 1] : parts[0]
+
+        // Find common prefix
+        let commonPrefix = completions[0]
+        for (let i = 1; i < completions.length; i++) {
+            let j = 0
+            while (
+                j < Math.min(commonPrefix.length, completions[i].length) &&
+                commonPrefix[j].toLowerCase() === completions[i][j].toLowerCase()
+            ) {
+                j++
+            }
+            commonPrefix = commonPrefix.substring(0, j)
+        }
+
+        // If common prefix is longer than what user typed, complete to common prefix
+        if (commonPrefix.length > partial.length) {
+            if (parts.length === 1) {
+                currentInput.value = commonPrefix
+            } else {
+                parts[parts.length - 1] = commonPrefix
+                currentInput.value = parts.join(' ')
+            }
+        } else {
+            // Show all completions
+            terminalHistory.value.push({
+                content: createPrompt(currentInput.value),
+                isHtml: true,
+                isCommand: true
+            })
+
+            const completionList = completions
+                .map((comp) => {
+                    const currentDir = getCurrentDirectory()
+                    const entry = currentDir[comp]
+                    if (entry) {
+                        const typeIndicator = entry.type === 'directory' ? '/' : ''
+                        return comp + typeIndicator
+                    }
+                    return comp
+                })
+                .join('  ')
+
+            terminalHistory.value.push({
+                content: completionList,
+                isHtml: false,
+                isCommand: false
+            })
+
+            nextTick(() => {
+                if (terminalRef.value) {
+                    terminalRef.value.scrollTop = terminalRef.value.scrollHeight
+                }
+            })
+        }
+    }
+}
+
 const handleKeyPress = (event: KeyboardEvent) => {
     if (isTyping.value) return
 
-    if (event.key === 'Enter') {
+    if (event.key === 'Tab') {
+        event.preventDefault()
+        handleTabCompletion()
+    } else if (event.key === 'Enter') {
         executeCommand(currentInput.value)
     } else if (event.key === 'Backspace') {
         currentInput.value = currentInput.value.slice(0, -1)
@@ -530,9 +1079,38 @@ const handleKeyPress = (event: KeyboardEvent) => {
     }
 }
 
+// Mobile input handling
+const mobileInputRef = ref<HTMLInputElement>()
+
+const handleMobileInput = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    currentInput.value = target.value
+}
+
+const handleMobileKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Tab') {
+        event.preventDefault()
+        handleTabCompletion()
+    } else if (event.key === 'Enter') {
+        executeCommand(currentInput.value)
+        if (mobileInputRef.value) {
+            mobileInputRef.value.value = ''
+        }
+        currentInput.value = ''
+    }
+}
+
+const showMobileKeyboard = () => {
+    if (isMobile.value && mobileInputRef.value) {
+        mobileInputRef.value.focus()
+    }
+}
+
 const focusTerminal = () => {
     // Focus the terminal for keyboard input
-    if (terminalRef.value) {
+    if (isMobile.value) {
+        showMobileKeyboard()
+    } else if (terminalRef.value) {
         terminalRef.value.focus()
     }
 }
@@ -547,9 +1125,18 @@ const createLink = (url: string, text?: string) => {
     return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="terminal-link">${linkText}</a>`
 }
 
+// Helper function to get current directory display name
+const getCurrentDirectoryDisplay = (): string => {
+    if (currentPath.value.length === 0) {
+        return '~'
+    }
+    return '~/' + currentPath.value.join('/')
+}
+
 // Helper function to create styled prompt
 const createPrompt = (cmd: string) => {
-    return `<span style="color: ${theme.value.prompt}; font-weight: 500;">imggion@portfolio:~$</span> <span style="color: ${theme.value.text};">${cmd}</span>`
+    const currentDir = getCurrentDirectoryDisplay()
+    return `<span style="color: ${theme.value.prompt}; font-weight: 500;">imggion@portfolio:${currentDir}$</span> <span style="color: ${theme.value.text};">${cmd}</span>`
 }
 
 // Custom SVG icon mapping with actual SVG content from Vue components
@@ -734,7 +1321,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-    // Remove event listeners before unmounting
+    // Clean up event listeners before unmounting
     document.removeEventListener('keydown', handleKeyPress)
     window.removeEventListener('resize', handleResize)
 })
@@ -804,7 +1391,7 @@ onUnmounted(() => {
             <!-- Current Input Line -->
             <div class="flex items-center mt-2">
                 <span class="mr-2 font-medium" :style="{ color: theme.prompt }"
-                    >imggion@portfolio:~$</span
+                    >imggion@portfolio:{{ getCurrentDirectoryDisplay() }}$</span
                 >
                 <span :style="{ color: theme.text }">{{ currentInput }}</span>
                 <span
@@ -814,14 +1401,32 @@ onUnmounted(() => {
                 ></span>
             </div>
 
+            <!-- Mobile Input (Hidden) -->
+            <input
+                v-if="isMobile"
+                ref="mobileInputRef"
+                type="text"
+                class="mobile-input"
+                @input="handleMobileInput"
+                @keydown="handleMobileKeydown"
+                autocomplete="off"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+            />
+
             <!-- Instructions -->
             <div class="mt-8 text-xs opacity-60">
-                <p>Click anywhere and start typing commands...</p>
+                <p v-if="isMobile">Tap anywhere to show keyboard and start typing commands...</p>
+                <p v-else>Click anywhere and start typing commands...</p>
                 <p>
                     Available commands: help, about, projects, skills, contact, clear, whoami, ls,
-                    pwd, date, font, theme, themes, icons
+                    pwd, cd, cat, date, font, theme, themes, icons
                 </p>
-                <p>Use ↑/↓ arrow keys to navigate command history</p>
+                <p v-if="!isMobile">
+                    Use ↑/↓ arrow keys to navigate command history, Tab for autocompletion
+                </p>
+                <p v-else>Use Tab for autocompletion</p>
             </div>
         </div>
     </div>
@@ -974,5 +1579,21 @@ onUnmounted(() => {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Mobile input styles */
+.mobile-input {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    opacity: 0;
+    pointer-events: none;
+    width: 1px;
+    height: 1px;
+    border: none;
+    background: transparent;
+    color: transparent;
+    outline: none;
+    font-size: 16px; /* Prevents zoom on iOS */
 }
 </style>
