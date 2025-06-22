@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
 /* color palette from <https://github.com/vuejs/theme> */
 :root {
     --vt-c-white: #ffffff;
@@ -67,6 +69,7 @@ body {
         background-color 0.5s;
     line-height: 1.6;
     font-family:
+        'JetBrains Mono',
         Inter,
         -apple-system,
         BlinkMacSystemFont,
@@ -78,7 +81,7 @@ body {
         'Fira Sans',
         'Droid Sans',
         'Helvetica Neue',
-        sans-serif;
+        sans-serif !important;
     font-size: 15px;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

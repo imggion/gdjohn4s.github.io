@@ -69,15 +69,43 @@ export const socialLinks: PageInfo[] = [
 
 export const techStack: TechStack[] = [
     {
+        name: 'Rust',
+        icon: MdiLanguageRust
+    },
+    {
+        name: 'Bash',
+        icon: MdiLanguageRust
+    },
+    {
+        name: 'C',
+        icon: MdiLanguagePython
+    },
+    {
+        name: 'Docker',
+        icon: MdiLanguageRust
+    },
+    {
+        name: 'Typescript',
+        icon: MingcuteVueLine
+    },
+    {
         name: 'Vue',
         icon: MingcuteVueLine
     },
     {
-        name: 'Rust',
+        name: 'Nuxt',
         icon: MdiLanguageRust
     },
     {
         name: 'Python',
         icon: MdiLanguagePython
+    },
+    {
+        name: 'PostgreSQL',
+        icon: MdiLanguageRust
+    },
+    {
+        name: 'Others..',
+        icon: MdiLanguageRust
     }
 ]

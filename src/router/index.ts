@@ -1,26 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { HomeView, InformationView, ProjectsListView, ContactView } from '@/views'
+import TerminalView from '@/views/TerminalView.vue'
 
 const routes = [
     {
         path: '/',
-        name: 'home',
-        component: HomeView
+        name: 'terminal',
+        component: TerminalView
     },
+    // Redirect all other paths to terminal
     {
-        path: '/about',
-        name: 'about',
-        component: InformationView
-    },
-    {
-        path: '/projects',
-        name: 'projects',
-        component: ProjectsListView
-    },
-    {
-        path: '/contact',
-        name: 'contact',
-        component: ContactView
+        path: '/:pathMatch(.*)*',
+        redirect: '/'
     }
 ]
 

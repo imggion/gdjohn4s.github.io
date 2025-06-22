@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { Navbar, Footer } from '@/components'
-import { hello } from './defs/messages'
 import { useSeoMeta } from '@vueuse/head'
 
-console.log(hello)
-
 useSeoMeta({
-    title: 'gdjohn4s | Portfolio',
+    title: 'imggion | Terminal Portfolio',
     ogImage: {
         url: '/img/og_bg.png',
         type: 'image/png'
@@ -20,25 +16,21 @@ useSeoMeta({
 </script>
 
 <template>
-    <header>
-        <Navbar />
-    </header>
-    <RouterView class="router-view" v-slot="{ Component }">
-        <Transition name="slideroute">
-            <component :is="Component" />
-        </Transition>
-    </RouterView>
-    <Footer />
+    <RouterView />
 </template>
 
-<style scoped>
-.slideroute-enter-active,
-.slideroute-leave-active {
-    transition: all 0.2s ease-in-out;
+<style>
+/* Remove default body margins and ensure full height */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', 'Courier New', 'Monaco', 'Menlo', monospace !important;
 }
 
-.slideroute-enter-from,
-.slideroute-leave-to {
-    opacity: 0;
+#app {
+    height: 100vh;
+    font-family: 'JetBrains Mono', 'Courier New', 'Monaco', 'Menlo', monospace !important;
 }
 </style>

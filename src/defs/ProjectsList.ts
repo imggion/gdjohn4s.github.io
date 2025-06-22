@@ -7,6 +7,12 @@ export interface Project {
 
 export const projectList: Project[] = [
     {
+        name: 'Exastudio',
+        description: "Quality. Minimalism. Simplicity. That's how tech should be.",
+        linkTo: 'https://exastudio.io',
+        imageSrc: '/img/project_codeishot.png'
+    },
+    {
         name: 'Codeishot',
         description: 'Share your code with your friends!',
         linkTo: 'https://codeishot.com',
@@ -27,7 +33,7 @@ export const projectList: Project[] = [
     {
         name: 'Others',
         description: 'Other projects and so on..',
-        linkTo: 'https://github.com/gdjohn4s',
+        linkTo: 'https://github.com/imggion',
         imageSrc: '/img/project_mygithub.png'
     }
 ]

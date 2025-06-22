@@ -1,6 +1,3 @@
-import HomeView from './HomeView.vue'
-import InformationView from './InformationView.vue'
-import ProjectsListView from './ProjectsListView.vue'
-import ContactView from './ContactMeView.vue'
+import TerminalView from './TerminalView.vue'
 
-export { HomeView, InformationView, ProjectsListView, ContactView }
+export { TerminalView }
