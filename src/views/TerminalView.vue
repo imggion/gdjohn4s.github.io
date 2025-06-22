@@ -538,7 +538,7 @@ Note: Some projects have been refactored into current work.`
 
 GitHub: https://github.com/imggion
 LinkedIn: https://www.linkedin.com/in/giovanni-d-andrea-b3b456111/
-X (Twitter): https://x.com/imggion
+X (Twitter): https://twitter.com/jontec8
 
 Professional Email: giovanni@exastudio.io
 
@@ -714,7 +714,7 @@ Simplicity reigns in my approach to development.`,
         return {
             content: `Contact Information:
   Email: ${createLink('mailto:giovanni@exastudio.io', 'giovanni@exastudio.io')}
-  X (Formerly Twitter): ${createLink('https://x.com/imggion')}
+  X (Formerly Twitter): ${createLink('https://twitter.com/jontec8')}
   GitHub: ${createLink('https://github.com/imggion')}
   LinkedIn: ${createLink('https://www.linkedin.com/in/giovanni-d-andrea-b3b456111/')}`,
             isHtml: true
